@@ -107,3 +107,37 @@ async def run_revenue_agent(
                     final_text += part.text
                     
     return final_text
+
+async def interactive_loop():
+    print("==================================================")
+    print("🤖 Enterprise Revenue Recovery Agent")
+    print("Type 'quit' or 'exit' to stop.")
+    print("==================================================")
+    
+    session_id = "local_session_1"
+    user_id = "local_admin"
+    
+    while True:
+        try:
+            query = input("\nUser: ")
+            if query.lower() in ['quit', 'exit', 'q']:
+                print("Goodbye!")
+                break
+            if not query.strip():
+                continue
+                
+            print("\nAgent is thinking... (this may take a moment)")
+            response = await run_revenue_agent(query=query, session_id=session_id, user_id=user_id)
+            print(f"\nAgent: {response}")
+            
+        except KeyboardInterrupt:
+            print("\nGoodbye!")
+            break
+        except Exception as e:
+            print(f"\n[!] Error: {e}")
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(interactive_loop())
+    except KeyboardInterrupt:
+        pass
