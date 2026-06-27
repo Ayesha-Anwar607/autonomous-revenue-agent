@@ -1,7 +1,7 @@
 import os
 import asyncio
 import pytest
-from config.config import GEMINI_MODEL
+from src.config.config import GEMINI_MODEL
 from src.tools.tools import fetch_crm_deals, fetch_invoices, real_time_market_risk_analysis
 from src.tools.business_logic import (
     detect_stalled_deals,
@@ -220,16 +220,22 @@ def test_agent_initialization():
 
 @pytest.mark.asyncio
 async def test_end_to_end_revenue_scan():
-    """Full agent execution test — skipped if API key not configured."""
+    """Full agent execution test — skipped if API key not configured or rate-limited."""
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key or "YOUR_GEMINI_API_KEY" in api_key:
         pytest.skip("Skipping E2E test: GEMINI_API_KEY not configured.")
 
-    response = await run_revenue_agent(
-        query="Run a full revenue recovery scan and give me the top 3 issues by financial impact.",
-        session_id="test_e2e_phase2",
+    try:
+        response = await run_revenue_agent(
+            query="Run a full revenue recovery scan and give me the top 3 issues by financial impact.",
+            session_id="test_e2e_phase2",
+        )
+        assert isinstance(response, str)
+        assert len(response) > 50
+        print(f"\n[E2E Response]:\n{response}")
 
-    )
-    assert isinstance(response, str)
-    assert len(response) > 50
-    print(f"\n[E2E Response]:\n{response}")
+    except Exception as e:
+        err_str = str(e)
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
+            pytest.skip(f"Skipping E2E test: Gemini free-tier rate limit hit (429). Run again in 1 min.")
+        raise

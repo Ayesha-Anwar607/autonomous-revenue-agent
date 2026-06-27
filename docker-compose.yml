@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Container 1: PostgreSQL Database (For persistent storage/history)
+  postgres:
+    image: postgres:15-alpine
+    container_name: agent_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: agent_admin
+      POSTGRES_PASSWORD: agent_password_2026
+      POSTGRES_DB: agent_memory_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Container 2: Redis Cache (For fast session state & short-term memory)
+  redis:
+    image: redis:7-alpine
+    container_name: agent_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

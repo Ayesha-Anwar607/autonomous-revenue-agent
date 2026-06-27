@@ -4,7 +4,7 @@ Revenue leakage calculation, scoring, and prioritization functions.
 These are the core revenue intelligence tools exposed to the ADK agent.
 """
 from datetime import datetime, timezone
-from config.config import (
+from src.config.config import (
     STALLED_DEAL_DAYS_THRESHOLD,
     CHURN_RISK_HEALTH_SCORE_THRESHOLD,
     OVERDUE_INVOICE_DAYS_THRESHOLD

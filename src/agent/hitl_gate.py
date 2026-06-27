@@ -6,7 +6,6 @@ operations like sending customer outreach, escalating to collections, or
 placing accounts on credit hold.
 """
 import asyncio
-import json
 import logging
 from datetime import datetime, timezone
 from typing import Callable, Any

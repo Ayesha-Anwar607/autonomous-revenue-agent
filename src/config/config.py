@@ -8,6 +8,10 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
+# Database Settings
+POSTGRES_URL = os.getenv("POSTGRES_URL", "postgresql+asyncpg://agent_admin:agent_password_2026@localhost:5432/agent_memory_db")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
 # Operational Stream Thresholds
 STALLED_DEAL_DAYS_THRESHOLD = 30  # Days of no activity to consider a deal stalled
 CHURN_RISK_HEALTH_SCORE_THRESHOLD = 50  # Health score below this flags churn risk
