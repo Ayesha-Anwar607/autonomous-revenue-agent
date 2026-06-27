@@ -1,0 +1,35 @@
+# .pre-commit-config.yaml
+# Phase 4: Pre-commit security guardrails
+# Run manually: pre-commit run --all-files
+# Install hooks: pre-commit install
+# Bypass in emergency: git commit --no-verify
+
+repos:
+  # ── 1. General file hygiene ──────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: debug-statements        # Catch stray breakpoint() / pdb calls
+      - id: detect-private-key      # Block raw RSA/SSH private keys
+
+  # ── 2. Secret scanning (catches API keys, tokens, passwords) ────
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+        name: "🔑 Gitleaks — block secrets from being committed"
+
+  # ── 3. Python linting with Ruff (fast, replaces flake8+isort) ───
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        args: ["--fix"]             # Auto-fix safe issues
+      - id: ruff-format             # Enforce consistent formatting

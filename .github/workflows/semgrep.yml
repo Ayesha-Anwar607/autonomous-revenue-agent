@@ -1,0 +1,56 @@
+name: Semgrep Security Scan
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main"]
+  # Also allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Static Security Analysis
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep — OWASP Top 10
+        run: |
+          semgrep ci \
+            --config "p/owasp-top-ten" \
+            --config "p/python" \
+            --config "p/secrets" \
+            --error \
+            --json-output semgrep-results.json || true
+
+      - name: Run Semgrep — Security audit
+        run: |
+          semgrep \
+            --config "p/bandit" \
+            --config "p/sql-injection" \
+            --include="src/**/*.py" \
+            --error \
+            --verbose
+
+      - name: Upload Semgrep results as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-results
+          path: semgrep-results.json
+          retention-days: 30
+
+      - name: Semgrep summary
+        if: always()
+        run: |
+          echo "## 🔒 Semgrep Scan Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Scanned with rulesets: owasp-top-ten, python, secrets, bandit, sql-injection" >> $GITHUB_STEP_SUMMARY
+          if [ -f semgrep-results.json ]; then
+            FINDINGS=$(python3 -c "import json,sys; d=json.load(open('semgrep-results.json')); print(len(d.get('results', [])))")
+            echo "Total findings: $FINDINGS" >> $GITHUB_STEP_SUMMARY
+          fi

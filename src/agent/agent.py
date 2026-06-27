@@ -46,6 +46,7 @@ from src.memory.cache import (
     get_session_context,
     close_redis,
 )
+from src.security.guardrails import validate_query
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +107,15 @@ async def run_revenue_agent(
     Returns:
         The agent's final text response.
     """
+
+    # ── 0. Security guardrail — validate before hitting the LLM ──
+    guard = validate_query(query)
+    if not guard.is_safe:
+        logger.warning(
+            f"[SECURITY] Query blocked — category={guard.blocked_category}, "
+            f"user={user_id}, session={session_id}"
+        )
+        return guard.warning_message or "⛔ Your request was blocked by the security guardrail."
 
     # ── 1. Retrieve recent history ─────────────────────────────
     recent = await get_session_context(session_id)
