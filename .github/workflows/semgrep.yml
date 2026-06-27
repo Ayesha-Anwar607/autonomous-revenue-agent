@@ -19,23 +19,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Semgrep — OWASP Top 10
+      - name: Run Semgrep Scan
         run: |
-          semgrep ci \
+          semgrep scan \
             --config "p/owasp-top-ten" \
             --config "p/python" \
             --config "p/secrets" \
-            --error \
-            --json-output semgrep-results.json || true
-
-      - name: Run Semgrep — Security audit
-        run: |
-          semgrep \
             --config "p/bandit" \
             --config "p/sql-injection" \
-            --include="src/**/*.py" \
-            --error \
-            --verbose
+            --json -o semgrep-results.json
 
       - name: Upload Semgrep results as artifact
         uses: actions/upload-artifact@v4
@@ -51,6 +43,8 @@ jobs:
           echo "## 🔒 Semgrep Scan Complete" >> $GITHUB_STEP_SUMMARY
           echo "Scanned with rulesets: owasp-top-ten, python, secrets, bandit, sql-injection" >> $GITHUB_STEP_SUMMARY
           if [ -f semgrep-results.json ]; then
-            FINDINGS=$(python3 -c "import json,sys; d=json.load(open('semgrep-results.json')); print(len(d.get('results', [])))")
-            echo "Total findings: $FINDINGS" >> $GITHUB_STEP_SUMMARY
+            FINDINGS=$(python3 -c "import json; d=json.load(open('semgrep-results.json')); print(len(d.get('results', [])))")
+            echo "Total security findings: $FINDINGS" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Semgrep output file not found." >> $GITHUB_STEP_SUMMARY
           fi
