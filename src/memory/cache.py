@@ -48,7 +48,7 @@ async def ping_redis() -> bool:
     try:
         result = await get_redis().ping()
         if result:
-            print("[Cache] ✅ Redis is connected.")
+            logger.info("[Cache] Redis is connected.")
         return result
     except Exception as e:
         logger.warning(f"[Cache] Redis not reachable: {e}. Continuing without cache.")

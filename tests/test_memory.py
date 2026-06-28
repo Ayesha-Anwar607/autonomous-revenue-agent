@@ -54,6 +54,32 @@ async def ensure_db_schema():
     await close_engine()
 
 
+@pytest.fixture(autouse=True)
+async def cleanup_connections():
+    """
+    Function-scoped fixture: resets DB and Redis client singletons between tests.
+    This prevents 'Event loop is closed' or 'attached to a different loop' errors
+    caused by event loop replacement across tests.
+    """
+    import src.memory.cache as cache
+    import src.memory.database as database
+    # Reset before test
+    cache._redis_client = None
+    database._engine = None
+    yield
+    # Close and reset after test
+    try:
+        await cache.close_redis()
+    except Exception:
+        pass
+    try:
+        await database.close_engine()
+    except Exception:
+        pass
+    cache._redis_client = None
+    database._engine = None
+
+
 # ─────────────────────────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────────────────────────
