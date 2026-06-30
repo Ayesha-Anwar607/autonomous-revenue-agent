@@ -2,7 +2,7 @@ name: Semgrep Security Scan
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "feature/phase5-backend"]
   pull_request:
     branches: ["main"]
   # Also allow manual trigger from GitHub UI
